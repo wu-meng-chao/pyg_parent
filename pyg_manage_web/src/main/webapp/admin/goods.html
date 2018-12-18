@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- 页面meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>商品管理</title>
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport">
+    <link rel="stylesheet" href="../plugins/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../plugins/adminLTE/css/AdminLTE.css">
+    <link rel="stylesheet" href="../plugins/adminLTE/css/skins/_all-skins.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+	<script src="../plugins/jQuery/jquery-2.2.3.min.js"></script>
+    <script src="../plugins/bootstrap/js/bootstrap.min.js"></script>
+    <!--引入JS组件-->
+    <script type="text/javascript" src="../plugins/angularjs/angular.min.js"></script>
+    <!-- 分页组件开始 -->
+    <script src="../plugins/angularjs/pagination.js"></script>
+    <link rel="stylesheet" href="../plugins/angularjs/pagination.css">
+    <!-- 分页组件结束 -->
+    <script type="text/javascript" src="../js/base_pagination.js"></script>
+    <script type="text/javascript" src="../js/service/goodsService.js"></script>
+    <script type="text/javascript" src="../js/service/itemCatService.js"></script>
+    <script type="text/javascript" src="../js/service/typeTemplateService.js"></script>
+    <script type="text/javascript" src="../js/service/uploadService.js"></script>
+    <script type="text/javascript" src="../js/controller/baseController.js"></script>
+    <script type="text/javascript" src="../js/controller/goodsController.js"></script>
+    <!-- 富文本编辑器 -->
+    <link rel="stylesheet" href="../plugins/kindeditor/themes/default/default.css"/>
+    <script charset="utf-8" src="../plugins/kindeditor/kindeditor-min.js"></script>
+    <script charset="utf-8" src="../plugins/kindeditor/lang/zh_CN.js"></script>
+</head>
+
+<body class="hold-transition skin-red sidebar-mini" ng-app="pyg" ng-controller="goodsController" ng-init="findItemCatList()">
+  <!-- .box-body -->
+                
+                    <div class="box-header with-border">
+                        <h3 class="box-title">商品管理</h3>
+                    </div>
+
+                    <div class="box-body">
+
+                        <!-- 数据表格 -->
+                        <div class="table-box">
+
+                            <!--工具栏-->
+                            <div class="pull-left">
+                                <div class="form-group form-inline">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-default" title="删除" ng-click="dele()" ><i class="fa fa-trash-o"></i> 删除</button>
+                                        <button type="button" class="btn btn-default" ng-click="updateStatus('1')" title="审核通过" ><i class="fa fa-check"></i> 审核通过</button>
+                                        <button type="button" class="btn btn-default" ng-click="updateStatus('2')" title="驳回" ><i class="fa fa-ban"></i> 驳回</button>
+                                        <button type="button" class="btn btn-default" title="刷新" ><i class="fa fa-refresh"></i> 刷新</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="box-tools pull-right">
+                                <div class="has-feedback">
+									审核状态：
+									<select ng-model="searchEntity.auditStatus">
+										<option value=""  >全部</option>
+										<option value="0" >未审核</option>
+										<option value="1" >审核通过</option>
+										<option value="2" >审核未通过</option>
+									</select>&nbsp;&nbsp;
+                                    商品名称：<input ng-model="searchEntity.goodsName">
+									<button class="btn btn-default" ng-click="reloadList()" >查询</button>
+                                </div>
+                            </div>
+                            <!--工具栏/-->
+
+			                  <!--数据列表-->
+			                  <table id="dataList" class="table table-bordered table-striped table-hover dataTable">
+			                      <thead>
+			                          <tr>
+			                              <th class="" style="padding-right:0px">
+			                                  <input id="selall" type="checkbox" class="icheckbox_square-blue">
+			                              </th> 
+										  <th class="sorting_asc">商品ID</th>
+									      <th class="sorting">商品名称</th>
+									      <th class="sorting">商品价格</th>
+									      <th class="sorting">一级分类</th>
+									      <th class="sorting">二级分类</th>
+									      <th class="sorting">三级分类</th>
+									      <th class="sorting">状态</th>									     						
+					                      <th class="text-center">操作</th>
+			                          </tr>
+			                      </thead>
+			                      <tbody>
+			                          <tr ng-repeat="entity in list">
+			                              <td><input type="checkbox" ng-click="updateSelection($event,entity.id)"></td>
+				                          <td>{{entity.id}}</td>
+									      <td>{{entity.goodsName}}</td>
+									      <td>{{entity.price}}</td>
+									      <td>{{itemCatList[entity.category1Id]}}</td>
+									      <td>{{itemCatList[entity.category2Id]}}</td>
+									      <td>{{itemCatList[entity.category3Id]}}</td>
+		                                  <td>		                                  
+		                                  	<span>
+		                                  		{{status[entity.auditStatus]}}
+		                                  	</span>
+		                                  	
+		                                  </td>		                                  
+		                                  <td class="text-center">
+                                              <button type="button" class="btn bg-olive btn-xs" data-toggle="modal" data-target="#sellerModal" ng-click="findOne(entity.id)">详情</button>
+		                                  </td>
+			                          </tr>
+			                      </tbody>
+			                  </table>
+			                  <!--数据列表/-->
+                            <tm-pagination conf="paginationConf"></tm-pagination>
+							 
+                        </div>
+                        <!-- 数据表格 /-->
+                        
+                        
+                     </div>
+                    <!-- /.box-body -->
+  <!-- 商家详情 -->
+  <div class="modal fade" id="sellerModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg" >
+          <div class="modal-content">
+              <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                  <h3 id="myModalLabel">商家详情</h3>
+              </div>
+              <div class="modal-body">
+
+                  <ul class="nav nav-tabs">
+                      <li class="active"><a href="#home" data-toggle="tab">商品基本信息</a></li>
+                      <li><a href="#image" data-toggle="tab">商品图片</a></li>
+                      <li><a href="#specification" data-toggle="tab">规格</a></li>
+                      <li><a href="#introduction" data-toggle="tab">商品介绍</a></li>
+                      <li><a href="#packageList" data-toggle="tab">包装列表</a></li>
+                      <li><a href="#saleService" data-toggle="tab">售后服务</a></li>
+                  </ul>
+
+                  <!-- 选项卡开始 -->
+                  <div id="myTabContent" class="tab-content">
+
+                      <div class="tab-pane active in" id="home">
+                          <br>
+                          <table class="table table-bordered table-striped"  width="800px">
+                              <tr>
+                                  <td>商品分类</td>
+                                  <td>{{itemCatList[entry.goods.category1Id]}}
+                                      >>{{itemCatList[entry.goods.category2Id]}}
+                                      >>{{itemCatList[entry.goods.category3Id]}}
+                                  &nbsp;&nbsp;&nbsp;&nbsp;模板ID：{{entry.goods.typeTemplateId}}</td>
+                              </tr>
+                              <tr>
+                                  <td>商品名称</td>
+                                  <td>{{entry.goods.goodsName}}</td>
+                              </tr>
+                              <tr>
+                                  <td>品牌</td>
+                                  <td>{{entry.goods.brandId}}</td>
+                              </tr>
+                              <tr>
+                                  <td>副标题</td>
+                                  <td>{{entry.goods.caption}}</td>
+                              </tr>
+                              <tr>
+                                  <td>价格</td>
+                                  <td>¥{{entry.goods.price}}</td>
+                              </tr>
+                          </table>
+                      </div>
+
+                      <div class="tab-pane fade" id="packageList">
+                          <br>
+                          <table class="table table-bordered table-striped" >
+                              <tr>
+                                  <th>包装列表</th>
+                              </tr>
+                              <tr>
+                                  <td>{{entry.goodsDesc.packageList}}</td>
+                              </tr>
+                          </table>
+                      </div>
+                      <div class="tab-pane fade" id="saleService">
+                          <br>
+                          <table class="table table-bordered table-striped" >
+                              <tr>
+                                  <th>售后服务</th>
+                              </tr>
+                              <tr>
+                                  <td>{{entry.goodsDesc.saleService}}</td>
+                              </tr>
+                          </table>
+                      </div>
+                      <div class="tab-pane fade" id="image">
+                          <br>
+                          <table class="table table-bordered table-striped" >
+                              <tr >
+                                  <th>颜色</th>
+                                  <th>图片</th>
+                              </tr>
+                              <tr ng-repeat="pojo in entry.goodsDesc.itemImages">
+                                  <td>{{pojo.color}}</td>
+                                  <td>
+                                      <img alt="" ng-src="{{pojo.url}}" width="100px" height="100px">
+                                  </td>
+                              </tr>
+                          </table>
+                      </div>
+                      <div class="tab-pane fade" id="specification">
+                          <br>
+                          <table class="table table-bordered table-striped" >
+                              <tr>
+                                  <th class="sorting" ng-repeat="item in entry.goodsDesc.specificationItems">{{item.attributeName}}</th>
+                                  <th class="sorting">价格</th>
+                                  <th class="sorting">库存</th>
+                                  <th class="sorting">是否启用</th>
+                                  <th class="sorting">是否默认</th>
+                              </tr>
+                              <tr ng-repeat="pojo in entry.itemList">
+                                  <td ng-repeat="item in entry.goodsDesc.specificationItems">
+                                      {{pojo.spec[item.attributeName]}}
+                                  </td>
+                                  <td>
+                                      {{pojo.price}}
+                                  </td>
+                                  <td>
+                                      {{pojo.num}}
+                                  </td>
+                                  <td ng-if="pojo.status==1">
+                                      已启用
+                                  </td>
+                                  <td ng-if="pojo.isDefault==1">
+                                      默认项
+                                  </td>
+                              </tr>
+                          </table>
+                      </div>
+
+                      <div class="tab-pane fade" id="introduction">
+                          <br>
+                          <table class="table table-bordered table-striped" >
+                              <tr>
+                                  <th>商品介绍</th>
+                              </tr>
+                              <tr>
+                                  <td>{{entry.goodsDesc.introduction}}</td>
+                              </tr>
+                          </table>
+                      </div>
+                  </div>
+                  <!-- 选项卡结束 -->
+
+
+              </div>
+              <div class="modal-footer">
+                  <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">关闭</button>
+              </div>
+          </div>
+      </div>
+  </div>
+
+
+</body>
+
+</html>

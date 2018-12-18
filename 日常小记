@@ -1,0 +1,17 @@
+1、快捷键
+    ALT+7           查看当前类中的方法
+    CTRL+P          提示参数
+    ALT+/           基本补全
+    CTRL+SHIFT+空格  智能类型补全
+    CTRL+ALT+B      查看实现类
+    CTRL+ALT+M      抽取方法
+    CTRL+ALT+L      格式化代码
+    CTRL+ALT+T      try{}catch{}
+    Fn+Alt+Insert   打开generate
+    Tab+A+/         模板注释
+    CTRL+ALT+V      返回方法，相当于.var
+
+
+2、命令
+    location.href="#";      页面跳转
+    target="_blank"         打开新的标签页
